@@ -23,7 +23,7 @@ const searchText = ref('')
 
 const fetchItems = async (params = {}) => {
     try {
-        const { data } = await axios.get('https://269b3b45e08bcd1a.mokky.dev/items', { params })
+        const { data } = await axios.get('https://d3c39574bbd13030.mokky.dev/sneakers', { params })
         items.value = data.map((obj) => ({
             ...obj,
             isAdded: false,
@@ -36,7 +36,7 @@ const fetchItems = async (params = {}) => {
 
 const fetchFavourites = async () => {
     try {
-        const { data: favorites } = await axios.get('https://269b3b45e08bcd1a.mokky.dev/favorites')
+        const { data: favorites } = await axios.get('https://d3c39574bbd13030.mokky.dev/favorites')
         items.value = items.value.map((item) => {
             const favorite = favorites.find((fav) => fav.sneakerId === item.id)
             return favorite ? { ...item, isFavourite: true } : item
@@ -47,23 +47,31 @@ const fetchFavourites = async () => {
 }
 
 const postFavorite = async (id) => {
-    items.value = items.value.map((item) => {
-        if (item.id === id) {
-            if (item.isFavourite) {
-                axios.delete(`https://269b3b45e08bcd1a.mokky.dev/favorites/sneakersId=${id}`)
-            } else {
-                const obj = {
-                    sneakerId: item.id
+    const updatedItems = await Promise.all(
+        items.value.map(async (item) => {
+            if (item.id === id) {
+                const { data } = await axios.get(`https://d3c39574bbd13030.mokky.dev/favorites`)
+                const favorite = data.find((fav) => fav.sneakerId === item.id)
+
+                if (item.isFavourite) {
+                    await axios.delete(
+                        `https://d3c39574bbd13030.mokky.dev/favorites/${favorite.id}`
+                    )
+                } else {
+                    const obj = { sneakerId: item.id }
+                    await axios.post(`https://d3c39574bbd13030.mokky.dev/favorites`, obj)
                 }
-                axios.post(`https://269b3b45e08bcd1a.mokky.dev/favorites`, obj)
+
+                return {
+                    ...item,
+                    isFavourite: !item.isFavourite
+                }
             }
-            return {
-                ...item,
-                isFavourite: !item.isFavourite
-            }
-        }
-        return item
-    })
+            return item
+        })
+    )
+
+    items.value = updatedItems
 }
 
 provide('postFavorite', postFavorite)
