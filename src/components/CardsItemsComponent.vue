@@ -1,18 +1,19 @@
 <script setup>
 import Card from './CardItemComponent.vue'
 
-const onClickAdd = () => {
-    alert('Добавлено')
-}
-
 defineProps({
     items: Array,
-    addclickFavorite: Function
+    clickFavorite: Function,
+    clickInDrawer: Function
 })
+const emit = defineEmits(['addFavorite'])
 </script>
 
 <template>
-    <div class="p-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+    <div
+        class="p-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"
+        v-auto-animate
+    >
         <Card
             v-for="item in items"
             :key="item.id"
@@ -21,9 +22,9 @@ defineProps({
             :name="item.title"
             :price="item.price"
             :isAdded="item.isAdded"
-            :isFavourite="item.isFavourite"
-            :onClickAdd="onClickAdd"
-            :onclickFavorite="addclickFavorite"
+            :isFavorite="item.isFavorite"
+            :onClickInDrawer="clickInDrawer"
+            :onclickFavorite="() => emit('addFavorite', item)"
         />
     </div>
 </template>

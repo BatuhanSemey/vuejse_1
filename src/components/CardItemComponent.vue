@@ -5,8 +5,8 @@ defineProps({
     name: String,
     price: Number,
     isAdded: Boolean,
-    isFavourite: Boolean,
-    onClickAdd: Function,
+    isFavorite: Boolean,
+    onClickInDrawer: Function,
     onclickFavorite: Function
 })
 </script>
@@ -14,9 +14,9 @@ defineProps({
 <template>
     <div class="border p-10 rounded-xl relative transition hover:-translate-y-2 hover:shadow-xl">
         <img
-            @click="onclickFavorite(id, isFavourite)"
+            @click="onclickFavorite"
             class="absolute top-5 left-5 cursor-pointer"
-            :src="isFavourite ? '/like-2.svg' : '/like-1.svg'"
+            :src="isFavorite ? '/like-2.svg' : '/like-1.svg'"
             alt=""
         />
         <img :src="image" alt="" />
@@ -28,7 +28,7 @@ defineProps({
             </div>
             <img
                 class="cursor-pointer"
-                @click="onClickAdd"
+                @click="onClickInDrawer(id)"
                 :src="isAdded ? '/checked.svg' : '/plus.svg'"
                 alt=""
             />
