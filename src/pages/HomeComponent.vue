@@ -26,7 +26,7 @@
             </div>
         </div>
     </section>
-    <Cards :items="items" @addFavorite="addFavorite" :clickInDrawer="addInDrawer" />
+    <Cards :items="items" @addFavorite="addFavorite" @clickInDrawer="addInDrawer" />
 </template>
 
 <script setup>
@@ -34,6 +34,7 @@ import { onMounted, ref, watch, provide } from 'vue'
 import axios from 'axios'
 import Cards from '../components/CardsItemsComponent.vue'
 import Advertising from '../components/Advertising1SneakerComponent.vue'
+import store from '../store'
 
 const items = ref([])
 const sortBy = ref('')
@@ -71,7 +72,6 @@ const addFavorite = async (item) => {
             const { data } = await axios.post('https://d3c39574bbd13030.mokky.dev/favorites', obj)
             item.isFavorite = true
             item.favoriteId = data.id
-            console.log(item)
         } else {
             await axios.delete(`https://d3c39574bbd13030.mokky.dev/favorites/${item.favoriteId}`)
             item.isFavorite = false
@@ -81,40 +81,44 @@ const addFavorite = async (item) => {
     }
 }
 
-const addInDrawer = async (id) => {
-    console.log(id)
-    const updateItems = await Promise.all(
-        items.value.map(async (item) => {
-            if (item.id === id) {
-                const { data } = await axios.get(`https://d3c39574bbd13030.mokky.dev/drawer`)
-                const drawerSneaker = data.find((drawerS) => drawerS.sneakerId === item.id)
-
-                if (item.isAdded) {
-                    await axios.delete(
-                        `https://d3c39574bbd13030.mokky.dev/drawer/${drawerSneaker.id}`
-                    )
-                } else {
-                    const obj = { sneakerId: item.id }
-                    await axios.post(`https://d3c39574bbd13030.mokky.dev/drawer`, obj)
-                    alert('Добавлено')
-                }
-
-                return {
-                    ...item,
-                    isAdded: !item.isAdded
-                }
-            }
-            return item
+const fetchDrawersComponents = async () => {
+    try {
+        const { data: drawers } = await axios.get('https://d3c39574bbd13030.mokky.dev/drawer')
+        items.value = items.value.map((item) => {
+            const drawer = drawers.find((draw) => draw.sneakerId === item.id)
+            return drawer ? { ...item, isAdded: true, addedId: drawer.id } : item
         })
-    )
-    items.value = updateItems
+        store.setItems(
+            items.value.filter((e) => {
+                return e.isAdded
+            })
+        )
+    } catch (error) {
+        console.error(error)
+    }
 }
 
-provide('addInDrawer', addInDrawer)
+const addInDrawer = async (item) => {
+    try {
+        if (!item.isAdded) {
+            const obj = { sneakerId: item.id }
+            const { data } = await axios.post('https://d3c39574bbd13030.mokky.dev/drawer', obj)
+            item.isAdded = true
+            item.addedId = data.id
+        } else {
+            await axios.delete(`https://d3c39574bbd13030.mokky.dev/drawer/${item.addedId}`)
+            item.isAdded = false
+        }
+        store.setItems(item)
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 onMounted(async () => {
     await fetchItems()
     await fetchFavourites()
+    await fetchDrawersComponents()
 })
 
 watch(sortBy, async () => {

@@ -28,7 +28,7 @@ defineProps({
             </div>
             <img
                 class="cursor-pointer"
-                @click="onClickInDrawer(id)"
+                @click="onClickInDrawer"
                 :src="isAdded ? '/checked.svg' : '/plus.svg'"
                 alt=""
             />

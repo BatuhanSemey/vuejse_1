@@ -6,7 +6,7 @@ defineProps({
     clickFavorite: Function,
     clickInDrawer: Function
 })
-const emit = defineEmits(['addFavorite'])
+const emit = defineEmits(['clickInDrawer', 'addFavorite'])
 </script>
 
 <template>
@@ -23,7 +23,7 @@ const emit = defineEmits(['addFavorite'])
             :price="item.price"
             :isAdded="item.isAdded"
             :isFavorite="item.isFavorite"
-            :onClickInDrawer="clickInDrawer"
+            :onClickInDrawer="() => emit('clickInDrawer', item)"
             :onclickFavorite="() => emit('addFavorite', item)"
         />
     </div>

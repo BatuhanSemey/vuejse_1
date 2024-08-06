@@ -12,7 +12,7 @@
         <ul class="flex items-center gap-10">
             <li class="flex items-center gap-3 cursor-pointer text-gray-500 hover:text-black">
                 <img @click="openDrawer" src="/cart.svg" alt="" />
-                <b>1205 тенге.</b>
+                <b>{{ totalPrice }}</b>
             </li>
             <router-link to="/favorites">
                 <li class="flex items-center gap-3 cursor-pointer text-gray-500 hover:text-black">
@@ -29,8 +29,13 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import store from '../store'
+
+const props = defineProps({
     openDrawer: Function,
     openBookmark: Function
 })
+
+const totalPrice = computed(() => store.totalPrice)
 </script>
